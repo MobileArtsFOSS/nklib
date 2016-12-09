@@ -105,26 +105,30 @@ raw_uri(#uri{domain=(<<"*">>)}) ->
 
 raw_uri(#uri{}=Uri) ->
     [
-        Uri#uri.disp, $<, nklib_util:to_binary(Uri#uri.scheme), $:,
-        case Uri#uri.user of
-            <<>> -> <<>>;
-            User ->
-                case Uri#uri.pass of
-                    <<>> -> [User, $@];
-                    Pass -> [User, $:, Pass, $@]
-                end
-        end,
-        Uri#uri.domain, 
-        case Uri#uri.port of
-            0 -> [];
-            Port -> [$:, integer_to_list(Port)]
-        end,
-        Uri#uri.path,
-        gen_opts(Uri#uri.opts),
-        gen_headers(Uri#uri.headers),
-        $>,
-        gen_opts(Uri#uri.ext_opts),
-        gen_headers(Uri#uri.ext_headers)
+     Uri#uri.disp, $<, nklib_util:to_binary(Uri#uri.scheme), $:,
+     case Uri#uri.user of
+         <<>> -> <<>>;
+         User ->
+             case Uri#uri.pass of
+                 <<>> -> [User];
+                 Pass -> [User, $:, Pass]
+             end
+     end,
+     case {Uri#uri.domain, Uri#uri.user} of
+         {undefined,_} -> [];
+         {Domain, <<>>} -> [Domain];
+         {Domain, _U} -> [$@,Domain]
+     end,
+     case Uri#uri.port of
+         0 -> [];
+         Port -> [$:, integer_to_list(Port)]
+     end,
+     Uri#uri.path,
+     gen_opts(Uri#uri.opts),
+     gen_headers(Uri#uri.headers),
+     $>,
+     gen_opts(Uri#uri.ext_opts),
+     gen_headers(Uri#uri.ext_headers)
     ].
 
 
@@ -135,21 +139,25 @@ raw_uri(#uri{}=Uri) ->
 
 raw_uri3(#uri{}=Uri) ->
     [
-        nklib_util:to_binary(Uri#uri.scheme), $:,
-        case Uri#uri.user of
-            <<>> -> <<>>;
-            User ->
-                case Uri#uri.pass of
-                    <<>> -> [User, $@];
-                    Pass -> [User, $:, Pass, $@]
-                end
-        end,
-        Uri#uri.domain, 
-        case Uri#uri.port of
-            0 -> [];
-            Port -> [$:, integer_to_list(Port)]
-        end,
-        gen_opts(Uri#uri.opts)
+     nklib_util:to_binary(Uri#uri.scheme), $:,
+     case Uri#uri.user of
+         <<>> -> <<>>;
+         User ->
+             case Uri#uri.pass of
+                 <<>> -> [User];
+                 Pass -> [User, $:, Pass]
+             end
+     end,
+     case {Uri#uri.domain, Uri#uri.user} of
+         {undefined,_} -> <<>>;
+         {Domain, <<>>} -> [Domain];
+         {Domain, _U} -> [$@,Domain]
+     end, 
+     case Uri#uri.port of
+         0 -> [];
+         Port -> [$:, integer_to_list(Port)]
+     end,
+     gen_opts(Uri#uri.opts)
     ].
 
 

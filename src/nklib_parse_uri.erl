@@ -95,7 +95,7 @@ disp([92, $"|Rest], Acc, true, Uri, Full) ->
 disp([$"|Rest], Acc, Quoted, Uri, Full) -> 
     disp(Rest, [$"|Acc], not Quoted, Uri, Full);
 
-disp([Ch|Rest], Acc, Quoted, Uri, Full) -> 
+disp([Ch|Rest], Acc, Quoted, Uri, Full) ->
     disp(Rest, [Ch|Acc], Quoted, Uri, Full).
 
 
@@ -110,14 +110,21 @@ scheme([$:|Rest], Acc, Block, Uri) ->
         _ ->
             Uri1 = Uri#uri{scheme=nklib_parse:scheme(lists:reverse(Acc))},
             Rest1 = strip(Rest),
-            case user(Rest1, [], Block, Uri1) of
-                {error, _Error, _Line} -> 
-                    case domain(Rest1, [], false, Block, Uri1) of
-                        {error, Error1, Line1} -> {error, Error1, Line1};
-                        {Uri2, Rest2} -> {Uri2, Rest2}
-                    end;
-                {Uri2, Rest2} -> 
-                    {Uri2, Rest2}
+            case Uri1#uri.scheme of
+                urn ->
+                    urn(Rest1, [], false, Uri1);
+                <<"urn">> ->
+                    urn(Rest1, [], false, Uri1);
+                _ ->
+                    case user(Rest1, [], Block, Uri1) of
+                        {error, _Error, _Line} -> 
+                            case domain(Rest1, [], false, Block, Uri1) of
+                                {error, Error1, Line1} -> {error, Error1, Line1};
+                                {Uri2, Rest2} -> {Uri2, Rest2}
+                            end;
+                        {Uri2, Rest2} -> 
+                            {Uri2, Rest2}
+                    end
             end
     end;
 
@@ -132,6 +139,17 @@ scheme([$,|_Rest], _Acc, _Block, _Uri) ->
 
 scheme([Ch|Rest], Acc, Block, Uri) ->
     scheme(Rest, [Ch|Acc], Block, Uri).
+
+%% URN
+urn([], Acc, _B, Uri) ->
+    {Uri#uri{user=lists:reverse(Acc),
+             domain=undefined}, []};
+urn([$>|Rest], Acc, B, Uri) ->
+    urn(Rest, Acc, B, Uri);
+urn([$<|Rest], Acc, B, Uri) ->
+    urn(Rest, Acc, B, Uri);
+urn([Ch|Rest], Acc, B, Uri) ->
+    urn(Rest, [Ch|Acc], B, Uri).
 
 
 %% @private URI User
