@@ -147,7 +147,7 @@ luid() ->
     binary().
 
 uuid_4122() ->
-    Rand = hex(crypto:rand_bytes(4)),
+    Rand = hex(crypto:strong_rand_bytes(4)),
     <<A:16/bitstring, B:16/bitstring, C:16/bitstring>> = <<(nklib_util:l_timestamp()):48>>,
     Hw = get_hwaddr(),
     <<Rand/binary, $-, (hex(A))/binary, $-, (hex(B))/binary, $-, 
@@ -229,7 +229,7 @@ get_hwaddrs([{Name, Data}|Rest]) ->
     end;
 
 get_hwaddrs([]) ->
-    hex(crypto:rand_bytes(6)).
+    hex(crypto:strong_rand_bytes(6)).
 
 
 
