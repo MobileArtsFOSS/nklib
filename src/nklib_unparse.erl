@@ -128,7 +128,7 @@ raw_uri(#uri{}=Uri) ->
      gen_headers(Uri#uri.headers),
      gen_opts(Uri#uri.ext_opts),
      gen_headers(Uri#uri.ext_headers),
-     $>,
+     $>
     ].
 
 
