@@ -159,7 +159,8 @@ raw_uri(#uri{}=Uri) ->
      $>,
      gen_opts(Uri#uri.ext_opts),
      gen_headers(Uri#uri.ext_headers)
-    ].
+    ]
+    end.
 
 %% @private Serializes an `nksip:uri()'  without `<' and `>' as delimiters
 %% and no disp, headers or external opts
