@@ -104,6 +104,9 @@ raw_uri(#uri{domain=(<<"*">>)}) ->
     [<<"*">>];
 
 raw_uri(#uri{}=Uri) ->
+
+    case nklib_util:to_binary(Uri#uri.scheme) of
+        <<"sip">> ->
     [
      Uri#uri.disp, $<, nklib_util:to_binary(Uri#uri.scheme), $:,
      case Uri#uri.user of
@@ -129,8 +132,34 @@ raw_uri(#uri{}=Uri) ->
      gen_opts(Uri#uri.ext_opts),
      gen_headers(Uri#uri.ext_headers),
      $>
+    ];
+        _ ->
+    [
+     Uri#uri.disp, $<, nklib_util:to_binary(Uri#uri.scheme), $:,
+     case Uri#uri.user of
+         <<>> -> <<>>;
+         User ->
+             case Uri#uri.pass of
+                 <<>> -> [User];
+                 Pass -> [User, $:, Pass]
+             end
+     end,
+     case {Uri#uri.domain, Uri#uri.user} of
+         {undefined,_} -> [];
+         {Domain, <<>>} -> [Domain];
+         {Domain, _U} -> [$@,Domain]
+     end,
+     case Uri#uri.port of
+         0 -> [];
+         Port -> [$:, integer_to_list(Port)]
+     end,
+     Uri#uri.path,
+     gen_opts(Uri#uri.opts),
+     gen_headers(Uri#uri.headers),
+     $>
+     gen_opts(Uri#uri.ext_opts),
+     gen_headers(Uri#uri.ext_headers)
     ].
-
 
 %% @private Serializes an `nksip:uri()'  without `<' and `>' as delimiters
 %% and no disp, headers or external opts
