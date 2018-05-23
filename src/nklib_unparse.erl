@@ -105,8 +105,8 @@ raw_uri(#uri{domain=(<<"*">>)}) ->
 
 raw_uri(#uri{}=Uri) ->
 
-    case nklib_util:to_binary(Uri#uri.scheme) of
-        <<"sip">> ->
+    case Uri#uri.scheme of
+        sip ->
     [
      Uri#uri.disp, $<, nklib_util:to_binary(Uri#uri.scheme), $:,
      case Uri#uri.user of
